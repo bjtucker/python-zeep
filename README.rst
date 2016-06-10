@@ -31,8 +31,8 @@ Status
 .. image:: https://travis-ci.org/bjtucker/python-zeep.svg?branch=my
     :target: https://travis-ci.org/bjtucker/python-zeep
 
-.. image:: http://codecov.io/github/bjtucker/python-zeep/coverage.svg?branch=my 
-    :target: http://codecov.io/github/bjtucker/python-zeep?branch=my
+.. image:: https://codecov.io/github/bjtucker/python-zeep/coverage.svg?branch=my 
+    :target: https://codecov.io/github/bjtucker/python-zeep?branch=my
 
 .. image:: https://img.shields.io/pypi/v/zeep.svg
     :target: https://pypi.python.org/pypi/zeep/
