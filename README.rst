@@ -28,20 +28,20 @@ Status
 .. image:: https://readthedocs.org/projects/python-zeep/badge/?version=latest
     :target: https://readthedocs.org/projects/python-zeep/
    
-.. image:: https://travis-ci.org/bjtucker/python-zeep.svg?branch=master
+.. image:: https://travis-ci.org/bjtucker/python-zeep.svg?branch=my
     :target: https://travis-ci.org/bjtucker/python-zeep
 
 .. image:: https://ci.appveyor.com/api/projects/status/adw96fgtatnyy9si?svg=true
     :target: https://ci.appveyor.com/project/bjtucker/python-zeep
 
-.. image:: https://codecov.io/github/bjtucker/python-zeep/coverage.svg?branch=master 
-    :target: https://codecov.io/github/bjtucker/python-zeep?branch=master
+.. image:: https://codecov.io/github/bjtucker/python-zeep/coverage.svg?branch=my 
+    :target: https://codecov.io/github/bjtucker/python-zeep?branch=my
 
 .. image:: https://img.shields.io/pypi/v/zeep.svg
     :target: https://pypi.python.org/pypi/zeep/
 
-.. image:: https://requires.io/github/bjtucker/python-zeep/requirements.svg?branch=master
-     :target: https://requires.io/github/bjtucker/python-zeep/requirements/?branch=master
+.. image:: https://requires.io/github/bjtucker/python-zeep/requirements.svg?branch=my
+     :target: https://requires.io/github/bjtucker/python-zeep/requirements/?branch=my
 
 
 Installation
