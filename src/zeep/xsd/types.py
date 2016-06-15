@@ -1,11 +1,13 @@
-import pprint
+import itertools
+
 from collections import OrderedDict
 
 import six
 
-from zeep.utils import process_signature
 from zeep.xsd.elements import (
-    Any, Attribute, Choice, Element, GroupElement, ListElement, RefElement)
+    Any, Attribute, Choice, Element, GroupElement, ListElement, RefElement,
+    Sequence)
+from zeep.xsd.valueobjects import CompoundValue
 
 
 class Type(object):
@@ -42,6 +44,7 @@ class UnresolvedType(Type):
 class UnresolvedCustomType(Type):
 
     def __init__(self, name, base_qname):
+        assert name is not None
         self.name = name
         self.base_qname = base_qname
 
@@ -56,7 +59,9 @@ class UnresolvedCustomType(Type):
         return xsd_type()
 
 
+@six.python_2_unicode_compatible
 class SimpleType(Type):
+    name = None
 
     def __eq__(self, other):
         return (
@@ -87,18 +92,38 @@ class SimpleType(Type):
         return value
 
     def __call__(self, *args, **kwargs):
-        if args:
-            return six.text_type(args[0])
-        return u''
+        """Return the xmlvalue for the given value.
+
+        The args, kwargs handling is done here manually so that we can return
+        readable error messages instead of only '__call__ takes x arguments'
+
+        """
+        num_args = len(args) + len(kwargs)
+        if num_args != 1:
+            raise TypeError((
+                '%s() takes exactly 1 argument (%d given). ' +
+                'Simple types expect only a single value argument'
+            ) % (self.__class__.__name__, num_args))
+
+        if kwargs and 'value' not in kwargs:
+            raise TypeError((
+                '%s() got an unexpected keyword argument %r. ' +
+                'Simple types expect only a single value argument'
+            ) % (self.__class__.__name__, next(six.iterkeys(kwargs))))
+
+        value = args[0] if args else kwargs['value']
+        return self.xmlvalue(value)
 
     def __str__(self):
         return self.name
 
-    def __unicode__(self):
-        return six.text_type(self.name)
+    @classmethod
+    def signature(cls):
+        return 'value'
 
 
 class ComplexType(Type):
+    name = None
 
     def __init__(self, children=None):
         self._children = children or []
@@ -184,7 +209,7 @@ class ComplexType(Type):
 
     def parse_xmlelement(self, xmlelement, schema):
         instance = self()
-        fields = self.properties()
+        fields = self.fields()
         if not fields:
             return instance
 
@@ -193,7 +218,7 @@ class ComplexType(Type):
         if not elements and not attributes:
             return
 
-        fields_map = {f.name: f for f in fields if isinstance(f, Attribute)}
+        fields_map = {k: v for k, v in fields if isinstance(v, Attribute)}
         for key, value in attributes.items():
             field = fields_map.get(key)
             if not field:
@@ -201,34 +226,78 @@ class ComplexType(Type):
             value = field.parse(value, schema)
             setattr(instance, key, value)
 
-        fields = iter(f for f in fields if not isinstance(f, Attribute))
-        field = next(fields, None)
+        fields = iter((k, v) for k, v in fields if not isinstance(v, Attribute))
+        field_name, field = next(fields, (None, None))
 
         # If the type has no child elements (only attributes) then return
         # early
         if not field:
             return instance
 
-        for element in elements:
+        i = 0
+        num_elements = len(elements)
+        while i < num_elements:
+            element = elements[i]
+            result = None
 
             # Find matching element
-            while field and field.qname != element.tag:
-                field = next(fields, None)
+            while field:
+                if isinstance(field, (Choice, Any)):
+                    break
 
-            if not field:
-                break
+                if field.qname == element.tag:
+                    break
 
-            # Element can be optional, so if this doesn't match then assume it
-            # was.
-            if field.qname != element.tag:
-                continue
+                field_name, field = next(fields, (None, None))
 
-            result = field.parse(element, schema)
-            if isinstance(field, ListElement):
-                assert getattr(instance, field.name) is not None
-                getattr(instance, field.name).append(result)
+            if isinstance(field, Choice):
+                result = field.parse(elements[i:], schema)
+                i += sum(len(choice) for choice in result)
+
+                # If the field has maxOccurs = 1 and is not a sequence then
+                # make the interface easier to use by setting the property
+                # directly.
+                if field.max_occurs == 1:
+                    if len(result[0]) == 1:
+                        setattr(
+                            instance,
+                            next(six.iterkeys(result[0])),
+                            next(six.itervalues(result[0])))
+
+                setattr(instance, field_name, result)
+
+            elif isinstance(field, Any):
+                result = field.parse(element, schema)
+                setattr(instance, field_name, result)
+                i += 1
+
             else:
-                setattr(instance, field.name, result)
+                if not field:
+                    raise ValueError("Unexpected element: %r" % element)
+                    break
+
+                # Element can be optional, so if this doesn't match then assume
+                # it was.
+                if field.qname != element.tag:
+                    continue
+
+                current_field = field
+
+                result = current_field.parse(element, schema)
+                i += 1
+
+                if isinstance(field, ListElement):
+                    assert getattr(instance, field.name) is not None
+                    getattr(instance, field_name).append(result)
+                else:
+                    setattr(instance, field_name, result)
+
+            # Check if the next element also applies to the current field
+            try:
+                if field.max_occurs == 1 or element.tag != elements[i].tag:
+                    field_name, field = next(fields, (None, None))
+            except IndexError:
+                break
 
         return instance
 
@@ -240,59 +309,22 @@ class ComplexType(Type):
         return '%s(%s)' % (self.__class__.__name__, self.signature())
 
 
-class ListType(object):
+class ListType(Type):
     def __init__(self, item_type):
         self.item_type = item_type
+
+    def resolve(self, schema):
+        self.item_type = self.item_type.resolve(schema)
+        return self
+
+    def xmlvalue(self, value):
+        item_type = self.item_type
+        return ' '.join(item_type.xmlvalue(v) for v in value)
+
+    def render(self, parent, value):
+        parent.text = self.xmlvalue(value)
 
 
 class UnionType(object):
     def __init__(self, item_types):
         self.item_types = item_types
-
-
-class CompoundValue(object):
-
-    def __init__(self, *args, **kwargs):
-        fields = self._xsd_type.fields()
-
-        # Set default values
-        for key, value in fields:
-            if isinstance(value, ListElement):
-                value = []
-            else:
-                value = None
-            setattr(self, key, value)
-
-        items = process_signature(fields, args, kwargs)
-        fields = OrderedDict([(name, elm) for name, elm in fields])
-        for key, value in items.items():
-
-            if key in fields:
-                field = fields[key]
-
-                if isinstance(field, Choice):
-                    pass
-
-                elif isinstance(value, dict):
-                    value = field(**value)
-
-                elif isinstance(value, list):
-                    if isinstance(field.type, ComplexType):
-                        value = [field.type(**v) for v in value]
-                    else:
-                        value = [field.type(v) for v in value]
-
-            setattr(self, key, value)
-
-    def __repr__(self):
-        return pprint.pformat(self.__dict__, indent=4)
-
-
-class AnyObject(object):
-    def __init__(self, xsd_type, value):
-        self.xsd_type = xsd_type
-        self.value = value
-
-    def __repr__(self):
-        return '<%s(type=%r, value=%r)>' % (
-            self.__class__.__name__, self.xsd_type, self.value)

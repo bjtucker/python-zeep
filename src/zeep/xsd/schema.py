@@ -81,8 +81,10 @@ class Schema(object):
         return '<Schema(location=%r, is_empty=%r)>' % (self._location, self.is_empty)
 
     def resolve(self):
+        logger.info("Resolving schema %s", self)
         for key, type_ in self._types.items():
             new = type_.resolve(self)
+            assert new is not None, "resolve() should return a type"
             self._types[key] = new
 
         for element in self._elm_instances:

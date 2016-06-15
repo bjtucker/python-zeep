@@ -2,6 +2,8 @@ import copy
 
 from lxml import etree
 
+from six.moves import zip_longest
+
 
 class Base(object):
     _require_keyword_arg = False
@@ -41,6 +43,18 @@ class Any(Base):
         else:
             value.xsd_type.render(parent, value.value)
 
+    def parse(self, xmlelement, schema):
+        xsd_type = xmlelement.get('{http://www.w3.org/2001/XMLSchema-instance}type')
+        if xsd_type is not None:
+            element_type = schema.get_type(xsd_type)
+            return element_type.parse(xmlelement, schema)
+
+        try:
+            element_type = schema.get_element(xmlelement.tag)
+            return element_type.parse(xmlelement, schema)
+        except KeyError:
+            return xmlelement
+
     def __call__(self, any_object):
         return any_object
 
@@ -64,6 +78,11 @@ class Element(Base):
         self.max_occurs = max_occurs
         self.nillable = nillable
         # assert type_
+
+    def __str__(self):
+        if self.type:
+            return '%s(%s)' % (self.name, self.type.signature())
+        return '%s()' % self.name
 
     def __call__(self, *args, **kwargs):
         instance = self.type(*args, **kwargs)
@@ -159,8 +178,7 @@ class ListElement(Element):
 
     def render(self, parent, value):
         for val in value:
-            node = etree.SubElement(parent, self.qname)
-            self.type.render(node, val)
+            super(ListElement, self).render(parent, val)
 
 
 class GroupElement(Element):
@@ -213,6 +231,8 @@ class Choice(Base):
 
             if isinstance(choice_element, Element):
                 choice_value = item.values.get(choice_element.name)
+                if choice_value is None and self.is_optional:
+                    return
 
                 if isinstance(choice_value, list):
                     for item in choice_value:
@@ -238,6 +258,31 @@ class Choice(Base):
             return '%s: [%s]' % (name, part)
         return '%s: %s' % (name, part)
 
+    def parse(self, elements, schema):
+        result = []
+        i = 0
+        for choice_element in elements:
+            for iter_field in self.elements:
+                if isinstance(iter_field, Sequence):
+                    subresult = iter_field.parse(elements[i:], schema)
+                    if subresult:
+                        i += len(subresult)
+                        result.append(subresult)
+                        break
+                else:
+                    if iter_field.qname == choice_element.tag:
+                        choice_result = iter_field.parse(choice_element, schema)
+                        result.append({
+                            iter_field.name: choice_result
+                        })
+                        i += 1
+                        break
+
+            if len(result) >= self.max_occurs:
+                break
+
+        return result
+
 
 class Sequence(list):
     name = 'sequence'
@@ -246,6 +291,23 @@ class Sequence(list):
         return ', '.join([
             element.signature(element.name) for element in self
         ])
+
+    def parse(self, elements, schema):
+
+        result = {}
+        for field, element in zip_longest(self, elements):
+            if field is None:
+                break
+
+            if element is None and field.is_optional:
+                result[field.name] = None
+            elif field.qname == element.tag:
+                result[field.name] = field.parse(element, schema)
+            elif field.is_optional:
+                result[field.name] = None
+            else:
+                return None
+        return result
 
 
 class RefElement(object):

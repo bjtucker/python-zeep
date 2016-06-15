@@ -34,11 +34,18 @@ class ConcreteMessage(object):
 
         if as_output:
             if isinstance(self.body.type, xsd.ComplexType):
-                if len(self.body.type.properties()) == 1:
-                    return self.body.type.properties()[0].type.name
+                try:
+                    if len(self.body.type.properties()) == 1:
+                        return self.body.type.properties()[0].type.name
+                except AttributeError:
+                    return None
 
             return self.body.type.name
-        return self.body.type.signature()
+
+        result = self.body.type.signature()
+        if getattr(self, 'header', None):
+            result += ', _soapheader=%s' % self.header
+        return result
 
     @classmethod
     def parse(cls, wsdl, xmlelement, abstract_message, operation):
@@ -70,8 +77,9 @@ class SoapMessage(ConcreteMessage):
             self.body.render(body, body_value)
 
         if header_value is not None:
-            if self.header and isinstance(header_value, dict):
-                header_value = self.header(**header_value)
+            if self.header:
+                if isinstance(header_value, dict):
+                    header_value = self.header(**header_value)
                 header = soap.Header()
                 self.header.render(header, header_value)
             elif hasattr(header_value, '_xsd_elm'):
@@ -90,7 +98,7 @@ class SoapMessage(ConcreteMessage):
             envelope.append(body)
 
         headers = {
-            'SOAPAction': self.operation.soapaction,
+            'SOAPAction': self.operation.soapaction or self.operation.name
         }
 
         etree.cleanup_namespaces(envelope)
@@ -204,7 +212,7 @@ class DocumentMessage(SoapMessage):
         # FIXME (not so sure about this): If the response object has only one
         # property then return that property
         item = result[0]
-        if len(item._xsd_type.properties()) == 1:
+        if item and len(item._xsd_type.properties()) == 1:
             return getattr(item, item._xsd_type.properties()[0].name)
         return item
 

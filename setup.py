@@ -1,6 +1,7 @@
 from setuptools import find_packages, setup
 
 install_requires = [
+    'appdirs>=1.4.0',
     'defusedxml>=0.4.1',
     'isodate>=0.5.4',
     'lxml>=3.0.0',
@@ -25,7 +26,7 @@ tests_require = [
 
 setup(
     name='zeep',
-    version='0.9.0.dev0',
+    version='0.10.0.dev0',
     description='A modern/fast Python SOAP client based on lxml / requests',
     long_description=open('README.rst').read(),
     author="Michael van Tellingen",
