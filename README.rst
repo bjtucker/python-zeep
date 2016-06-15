@@ -31,8 +31,8 @@ Status
 .. image:: https://travis-ci.org/bjtucker/python-zeep.svg?branch=master
     :target: https://travis-ci.org/bjtucker/python-zeep
 
-.. image:: https://ci.appveyor.com/api/projects/status/im609ng9h29vt89r?svg=true
-    :target: https://ci.appveyor.com/project/mvantellingen/python-zeep
+.. image:: https://ci.appveyor.com/api/projects/status/adw96fgtatnyy9si?svg=true
+    :target: https://ci.appveyor.com/project/bjtucker/python-zeep
 
 .. image:: https://codecov.io/github/bjtucker/python-zeep/coverage.svg?branch=master 
     :target: https://codecov.io/github/bjtucker/python-zeep?branch=master
