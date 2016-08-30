@@ -59,7 +59,7 @@ class UsernameToken(object):
 
         # The token placeholder might already exists since it is specified in
         # the WSDL.
-        token = security.find('{%s}UsernameToken' % NSMAP['wsse'])
+        token = security.find('{{{0!s}}}UsernameToken'.format(NSMAP['wsse']))
         if token is None:
             token = WSSE.UsernameToken()
             security.append(token)
@@ -84,7 +84,7 @@ class UsernameToken(object):
         return [
             WSSE.Password(
                 self.password,
-                Type='%s#PasswordText' % self.username_token_profile_ns)
+                Type='{0!s}#PasswordText'.format(self.username_token_profile_ns))
         ]
 
     def _create_password_digest(self):
@@ -108,11 +108,11 @@ class UsernameToken(object):
         return [
             WSSE.Password(
                 digest,
-                Type='%s#PasswordDigest' % self.username_token_profile_ns
+                Type='{0!s}#PasswordDigest'.format(self.username_token_profile_ns)
             ),
             WSSE.Nonce(
                 base64.b64encode(nonce).decode('utf-8'),
-                EncodingType='%s#Base64Binary' % self.soap_message_secutity_ns
+                EncodingType='{0!s}#Base64Binary'.format(self.soap_message_secutity_ns)
             ),
             WSU.Created(timestamp)
         ]

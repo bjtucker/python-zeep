@@ -29,7 +29,7 @@ class Any(Base):
         self.type = AnyType()
 
     def __repr__(self):
-        return '<%s(name=%r)>' % (self.__class__.__name__, self.name)
+        return '<{0!s}(name={1!r})>'.format(self.__class__.__name__, self.name)
 
     def render(self, parent, value):
         assert parent is not None
@@ -59,7 +59,7 @@ class Any(Base):
         return any_object
 
     def signature(self, name=None):
-        return '%s%s: %s' % (
+        return '{0!s}{1!s}: {2!s}'.format(
             name, '=None' if self.is_optional else '',
             '[]' if self.max_occurs != 1 else ''
         )
@@ -81,8 +81,8 @@ class Element(Base):
 
     def __str__(self):
         if self.type:
-            return '%s(%s)' % (self.name, self.type.signature())
-        return '%s()' % self.name
+            return '{0!s}({1!s})'.format(self.name, self.type.signature())
+        return '{0!s}()'.format(self.name)
 
     def __call__(self, *args, **kwargs):
         instance = self.type(*args, **kwargs)
@@ -91,7 +91,7 @@ class Element(Base):
         return instance
 
     def __repr__(self):
-        return '<%s(name=%r, type=%r)>' % (
+        return '<{0!s}(name={1!r}, type={2!r})>'.format(
             self.__class__.__name__, self.name, self.type)
 
     def __eq__(self, other):
@@ -101,8 +101,8 @@ class Element(Base):
             self.__dict__ == other.__dict__)
 
     def signature(self, name=None):
-        assert self.type, '%r has no name' % self
-        return '%s%s: %s%s' % (
+        assert self.type, '{0!r} has no name'.format(self)
+        return '{0!s}{1!s}: {2!s}{3!s}'.format(
             name, '=None' if self.is_optional else '',
             self.type.name, '[]' if self.max_occurs != 1 else ''
         )
@@ -196,7 +196,7 @@ class GroupElement(Element):
         return self.children
 
     def signature(self, name):
-        return '%s%s: %s' % (
+        return '{0!s}{1!s}: {2!s}'.format(
             name, '=None' if self.is_optional else '',
             '[]' if self.max_occurs != 1 else ''
         )
@@ -250,13 +250,13 @@ class Choice(Base):
 
     def signature(self, name):
         part = ' | '.join([
-            '{%s}' % element.signature(element.name)
+            '{{{0!s}}}'.format(element.signature(element.name))
             for element in self.elements
         ])
 
         if self.max_occurs != 1:
-            return '%s: [%s]' % (name, part)
-        return '%s: %s' % (name, part)
+            return '{0!s}: [{1!s}]'.format(name, part)
+        return '{0!s}: {1!s}'.format(name, part)
 
     def parse(self, elements, schema):
         result = []

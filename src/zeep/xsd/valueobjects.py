@@ -15,7 +15,7 @@ class AnyObject(object):
         self.value = value
 
     def __repr__(self):
-        return '<%s(type=%r, value=%r)>' % (
+        return '<{0!s}(type={1!r}, value={2!r})>'.format(
             self.__class__.__name__, self.xsd_type, self.value)
 
 
@@ -52,7 +52,7 @@ class ChoiceItem(object):
         self.values = values
 
     def __repr__(self):
-        return '<%s(index=%r, values=%r)>' % (
+        return '<{0!s}(index={1!r}, values={2!r})>'.format(
             self.__class__.__name__, self.index, self.values)
 
     def __eq__(self, other):
@@ -99,7 +99,7 @@ def _process_signature(fields, args, kwargs):
 
     if len(args) > num_pos_args:
         raise TypeError(
-            "__init__() takes at most %s positional arguments (%s given)" % (
+            "__init__() takes at most {0!s} positional arguments ({1!s} given)".format(
                 num_pos_args, len(args)))
 
     # Process the positional arguments
@@ -125,7 +125,7 @@ def _process_signature(fields, args, kwargs):
 
             if isinstance(element, Any) and not isinstance(value, AnyObject):
                 raise TypeError(
-                    "%s: expected AnyObject, %s found" % (
+                    "{0!s}: expected AnyObject, {1!s} found".format(
                         name, type(value).__name__))
 
             result[name] = value

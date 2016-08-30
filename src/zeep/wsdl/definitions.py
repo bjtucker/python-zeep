@@ -29,7 +29,7 @@ class AbstractMessage(object):
         self.parts = OrderedDict()
 
     def __repr__(self):
-        return '<%s(name=%r)>' % (self.__class__.__name__, self.name.text)
+        return '<{0!s}(name={1!r})>'.format(self.__class__.__name__, self.name.text)
 
     def resolve(self, definitions):
         pass
@@ -127,7 +127,7 @@ class PortType(object):
         self.operations = operations
 
     def __repr__(self):
-        return '<%s(name=%r)>' % (
+        return '<{0!s}(name={1!r})>'.format(
             self.__class__.__name__, self.name.text)
 
     def resolve(self, definitions):
@@ -194,7 +194,7 @@ class Binding(object):
         return self.__class__.__name__
 
     def __repr__(self):
-        return '<%s(name=%r, port_type=%r)>' % (
+        return '<{0!s}(name={1!r}, port_type={2!r})>'.format(
             self.__class__.__name__, self.name.text, self.port_type)
 
     def get(self, name):
@@ -229,16 +229,16 @@ class Operation(object):
         self.abstract = self.binding.port_type.operations[self.name]
 
     def __repr__(self):
-        return '<%s(name=%r, style=%r)>' % (
+        return '<{0!s}(name={1!r}, style={2!r})>'.format(
             self.__class__.__name__, self.name, self.style)
 
     def __str__(self):
         if not self.input:
-            return u'%s(missing input message)' % (self.name)
+            return u'{0!s}(missing input message)'.format((self.name))
 
-        retval = u'%s(%s)' % (self.name, self.input.signature())
+        retval = u'{0!s}({1!s})'.format(self.name, self.input.signature())
         if self.output:
-            retval += u' -> %s' % (self.output.signature(as_output=True))
+            retval += u' -> {0!s}'.format((self.output.signature(as_output=True)))
         return retval
 
     def create(self, *args, **kwargs):
@@ -280,12 +280,12 @@ class Port(object):
         self.binding_options = None
 
     def __repr__(self):
-        return '<%s(name=%r, binding=%r, %r)>' % (
+        return '<{0!s}(name={1!r}, binding={2!r}, {3!r})>'.format(
             self.__class__.__name__, self.name, self.binding,
             self.binding_options)
 
     def __str__(self):
-        return u'Port: %s (%s)' % (self.name, self.binding)
+        return u'Port: {0!s} ({1!s})'.format(self.name, self.binding)
 
     def send(self, client, operation, args, kwargs):
         return self.binding.send(
@@ -330,10 +330,10 @@ class Service(object):
         self._is_resolved = False
 
     def __str__(self):
-        return u'Service: %s' % self.name
+        return u'Service: {0!s}'.format(self.name)
 
     def __repr__(self):
-        return '<%s(name=%r, ports=%r)>' % (
+        return '<{0!s}(name={1!r}, ports={2!r})>'.format(
             self.__class__.__name__, self.name, self.ports)
 
     def resolve(self, definitions):

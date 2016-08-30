@@ -73,7 +73,7 @@ class SoapBinding(Binding):
         """
         operation_obj = self.get(operation)
         if not operation_obj:
-            raise ValueError("Operation %r not found" % operation)
+            raise ValueError("Operation {0!r} not found".format(operation))
 
         # Create the SOAP envelope
         serialized = operation_obj.create(*args, **kwargs)
@@ -108,15 +108,13 @@ class SoapBinding(Binding):
         """
         if response.status_code != 200 and not response.content:
             raise TransportError(
-                u'Server returned HTTP status %d (no content available)'
-                % response.status_code)
+                u'Server returned HTTP status {0:d} (no content available)'.format(response.status_code))
 
         try:
             doc = fromstring(response.content)
         except etree.XMLSyntaxError:
             raise TransportError(
-                u'Server returned HTTP status %d (%s)'
-                % (response.status_code, response.content))
+                u'Server returned HTTP status {0:d} ({1!s})'.format(response.status_code, response.content))
 
         if client.wsse:
             client.wsse.verify(doc)

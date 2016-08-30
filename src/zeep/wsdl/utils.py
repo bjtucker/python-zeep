@@ -6,6 +6,6 @@ def _soap_element(xmlelement, key):
     ]
 
     for ns in namespaces:
-        retval = xmlelement.find('soap:%s' % key, namespaces={'soap': ns})
+        retval = xmlelement.find('soap:{0!s}'.format(key), namespaces={'soap': ns})
         if retval is not None:
             return retval

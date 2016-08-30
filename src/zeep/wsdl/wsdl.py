@@ -69,13 +69,13 @@ class Document(object):
         self.services = root_definitions.services
 
     def __repr__(self):
-        return '<WSDL(location=%r)>' % self.location
+        return '<WSDL(location={0!r})>'.format(self.location)
 
     def dump(self):
         print('')
         print("Prefixes:")
         for prefix, namespace in self.schema._prefix_map.items():
-            print(' ' * 4, '%s: %s' % (prefix, namespace))
+            print(' ' * 4, '{0!s}: {1!s}'.format(prefix, namespace))
 
         print('')
         print("Global elements:")
@@ -99,7 +99,7 @@ class Document(object):
                     key=operator.attrgetter('name'))
 
                 for operation in operations:
-                    print('%s%s' % (' ' * 12, six.text_type(operation)))
+                    print('{0!s}{1!s}'.format(' ' * 12, six.text_type(operation)))
                 print('')
 
     def _load_content(self, location):
@@ -158,7 +158,7 @@ class Definition(object):
         self.services = self.parse_service(doc)
 
     def __repr__(self):
-        return '<Definition(location=%r)>' % self.location
+        return '<Definition(location={0!r})>'.format(self.location)
 
     def get(self, name, key):
         container = getattr(self, name)
@@ -169,7 +169,7 @@ class Definition(object):
             container = getattr(definition, name)
             if key in container:
                 return container[key]
-        raise IndexError("No definition %r found" % name)
+        raise IndexError("No definition {0!r} found".format(name))
 
     def resolve_imports(self):
         """Resolve all root elements (types, messages, etc)."""
@@ -296,7 +296,7 @@ class Definition(object):
         schema_ns = {}
         for i, schema_node in enumerate(schema_nodes):
             ns = schema_node.get('targetNamespace')
-            int_name = schema_ns[ns] = 'intschema:xsd%d' % i
+            int_name = schema_ns[ns] = 'intschema:xsd{0:d}'.format(i)
             self.wsdl._parser_context.schema_nodes.add(schema_ns[ns], schema_node)
             self.wsdl._parser_context.schema_locations[int_name] = self.location
 
@@ -310,7 +310,7 @@ class Definition(object):
 
             # Create a new xsd:import element to import the schema
             import_node = etree.Element(import_tag)
-            import_node.set('schemaLocation', 'intschema:xsd%d' % i)
+            import_node.set('schemaLocation', 'intschema:xsd{0:d}'.format(i))
             if schema_node.get('targetNamespace'):
                 import_node.set('namespace', schema_node.get('targetNamespace'))
             container.append(import_node)

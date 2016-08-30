@@ -179,7 +179,7 @@ class gYearMonth(SimpleType):
 
     def xmlvalue(self, value):
         year, month, tzinfo = value
-        return '%04d-%02d%s' % (year, month, _unparse_timezone(tzinfo))
+        return '{0:04d}-{1:02d}{2!s}'.format(year, month, _unparse_timezone(tzinfo))
 
     def pythonvalue(self, value):
         match = self._pattern.match(value)
@@ -202,7 +202,7 @@ class gYear(SimpleType):
 
     def xmlvalue(self, value):
         year, tzinfo = value
-        return '%04d%s' % (year, _unparse_timezone(tzinfo))
+        return '{0:04d}{1!s}'.format(year, _unparse_timezone(tzinfo))
 
     def pythonvalue(self, value):
         match = self._pattern.match(value)
@@ -226,7 +226,7 @@ class gMonthDay(SimpleType):
 
     def xmlvalue(self, value):
         month, day, tzinfo = value
-        return '--%02d-%02d%s' % (month, day, _unparse_timezone(tzinfo))
+        return '--{0:02d}-{1:02d}{2!s}'.format(month, day, _unparse_timezone(tzinfo))
 
     def pythonvalue(self, value):
         match = self._pattern.match(value)
@@ -251,7 +251,7 @@ class gDay(SimpleType):
 
     def xmlvalue(self, value):
         day, tzinfo = value
-        return '---%02d%s' % (day, _unparse_timezone(tzinfo))
+        return '---{0:02d}{1!s}'.format(day, _unparse_timezone(tzinfo))
 
     def pythonvalue(self, value):
         match = self._pattern.match(value)
@@ -272,7 +272,7 @@ class gMonth(SimpleType):
 
     def xmlvalue(self, value):
         month, tzinfo = value
-        return '--%d%s' % (month, _unparse_timezone(tzinfo))
+        return '--{0:d}{1!s}'.format(month, _unparse_timezone(tzinfo))
 
     def pythonvalue(self, value):
         match = self._pattern.match(value)
@@ -492,8 +492,8 @@ def _unparse_timezone(tzinfo):
     minutes = tzinfo._minutes % 60
 
     if hours > 0:
-        return '+%02d:%02d' % (hours, minutes)
-    return '-%02d:%02d' % (abs(hours), minutes)
+        return '+{0:02d}:{1:02d}'.format(hours, minutes)
+    return '-{0:02d}:{1:02d}'.format(abs(hours), minutes)
 
 
 default_types = {

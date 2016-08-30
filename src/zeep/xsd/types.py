@@ -79,11 +79,11 @@ class SimpleType(Type):
 
     def xmlvalue(self, value):
         raise NotImplementedError(
-            '%s.xmlvalue() not implemented' % self.__class__.__name__)
+            '{0!s}.xmlvalue() not implemented'.format(self.__class__.__name__))
 
     def pythonvalue(self, xmlvalue):
         raise NotImplementedError(
-            '%s.pytonvalue() not implemented' % self.__class__.__name__)
+            '{0!s}.pytonvalue() not implemented'.format(self.__class__.__name__))
 
     def resolve(self, schema):
         return self
@@ -149,10 +149,10 @@ class ComplexType(Type):
         num_choice = 1
         for prop in self._children:
             if isinstance(prop, Any):
-                result.append(('_any_%d' % num_any, prop))
+                result.append(('_any_{0:d}'.format(num_any), prop))
                 num_any += 1
             elif isinstance(prop, Choice):
-                result.append(('_choice_%d' % num_choice, prop))
+                result.append(('_choice_{0:d}'.format(num_choice), prop))
                 num_choice += 1
             elif prop.name is None:
                 result.append(('_value', prop))
@@ -273,7 +273,7 @@ class ComplexType(Type):
 
             else:
                 if not field:
-                    raise ValueError("Unexpected element: %r" % element)
+                    raise ValueError("Unexpected element: {0!r}".format(element))
                     break
 
                 # Element can be optional, so if this doesn't match then assume
@@ -306,7 +306,7 @@ class ComplexType(Type):
         return self.__class__.__name__
 
     def __str__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.signature())
+        return '{0!s}({1!s})'.format(self.__class__.__name__, self.signature())
 
 
 class ListType(Type):

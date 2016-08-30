@@ -37,7 +37,7 @@ class SchemaVisitor(object):
     def process(self, node, parent):
         visit_func = self.visitors.get(node.tag)
         if not visit_func:
-            raise ValueError("No visitor defined for %r" % node.tag)
+            raise ValueError("No visitor defined for {0!r}".format(node.tag))
         result = visit_func(self, node, parent)
         return result
 
@@ -332,7 +332,7 @@ class SchemaVisitor(object):
         elif child.tag == tags.union:
             xsd_type = self.visit_union(child, node)
         else:
-            raise AssertionError("Unexpected child: %r" % child.tag)
+            raise AssertionError("Unexpected child: {0!r}".format(child.tag))
 
         assert xsd_type is not None
         if not is_anonymous:

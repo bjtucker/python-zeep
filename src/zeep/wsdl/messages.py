@@ -44,7 +44,7 @@ class ConcreteMessage(object):
 
         result = self.body.type.signature()
         if getattr(self, 'header', None):
-            result += ', _soapheader=%s' % self.header
+            result += ', _soapheader={0!s}'.format(self.header)
         return result
 
     @classmethod
@@ -203,7 +203,7 @@ class DocumentMessage(SoapMessage):
         result = []
         for part in self.abstract.parts.values():
             elm = node.find(part.element.qname)
-            assert elm is not None, '%s not found' % part.element.qname
+            assert elm is not None, '{0!s} not found'.format(part.element.qname)
             result.append(part.element.parse(elm, self.wsdl.schema))
 
         if len(result) > 1:
@@ -352,7 +352,7 @@ class UrlReplacement(HttpMessage):
 
         path = self.operation.location
         for key, value in params.items():
-            path = path.replace('(%s)' % key, value if value is not None else '')
+            path = path.replace('({0!s})'.format(key), value if value is not None else '')
         return SerializedMessage(path=path, headers=headers, content='')
 
     @classmethod

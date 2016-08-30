@@ -66,7 +66,7 @@ class SqliteCache(object):
 
     @property
     def _version_string(self):
-        prefix = u'$ZEEP:%s$' % self._version
+        prefix = u'$ZEEP:{0!s}$'.format(self._version)
         return bytes(prefix.encode('ascii'))
 
 

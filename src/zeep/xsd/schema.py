@@ -69,7 +69,7 @@ class Schema(object):
                     todo.append(schema)
                     assigned.add(schema)
                     if schema._target_namespace:
-                        prefix_map['ns%d' % num] = schema._target_namespace
+                        prefix_map['ns{0:d}'.format(num)] = schema._target_namespace
 
             for schema in todo:
                 _recurse(schema)
@@ -78,7 +78,7 @@ class Schema(object):
         return prefix_map
 
     def __repr__(self):
-        return '<Schema(location=%r, is_empty=%r)>' % (self._location, self.is_empty)
+        return '<Schema(location={0!r}, is_empty={1!r})>'.format(self._location, self.is_empty)
 
     def resolve(self):
         logger.info("Resolving schema %s", self)
@@ -124,7 +124,7 @@ class Schema(object):
             return self._imports[name.namespace].get_type(name)
 
         raise KeyError(
-            "No such type: %r (Only have %s)" % (
+            "No such type: {0!r} (Only have {1!s})".format(
                 name.text, ', '.join(self._types)))
 
     def get_element(self, name):
@@ -136,7 +136,7 @@ class Schema(object):
             return self._imports[name.namespace].get_element(name)
 
         raise KeyError(
-            "No such element: %r (Only have %s) (from: %s)" % (
+            "No such element: {0!r} (Only have {1!s}) (from: {2!s})".format(
                 name.text, ', '.join(self._elements), self))
 
     def get_attribute(self, name):
@@ -148,7 +148,7 @@ class Schema(object):
             return self._imports[name.namespace].get_attribute(name)
 
         raise KeyError(
-            "No such attribute: %r (Only have %s) (from: %s)" % (
+            "No such attribute: {0!r} (Only have {1!s}) (from: {2!s})".format(
                 name.text, ', '.join(self._attributes), self))
 
     def _create_qname(self, name):
@@ -161,7 +161,7 @@ class Schema(object):
                 return etree.QName(self._prefix_map[prefix], localname)
             else:
                 raise ValueError(
-                    "No namespace defined for the prefix %r" % prefix)
+                    "No namespace defined for the prefix {0!r}".format(prefix))
         else:
             return etree.QName(name)
 

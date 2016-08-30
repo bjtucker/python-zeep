@@ -28,7 +28,7 @@ def parse_xml(content, transport, parser_context=None, base_url=None):
     try:
         return fromstring(content, parser=parser, base_url=base_url)
     except etree.XMLSyntaxError as exc:
-        raise XMLSyntaxError("Invalid XML content received (%s)" % exc.message)
+        raise XMLSyntaxError("Invalid XML content received ({0!s})".format(exc.message))
 
 
 def load_external(url, transport, parser_context=None, base_url=None):

@@ -58,7 +58,7 @@ class HttpPostBinding(HttpBinding):
         """Called from the service"""
         operation_obj = self.get(operation)
         if not operation_obj:
-            raise ValueError("Operation %r not found" % operation)
+            raise ValueError("Operation {0!r} not found".format(operation))
 
         serialized = operation_obj.create(*args, **kwargs)
 
@@ -86,7 +86,7 @@ class HttpGetBinding(HttpBinding):
         """Called from the service"""
         operation_obj = self.get(operation)
         if not operation_obj:
-            raise ValueError("Operation %r not found" % operation)
+            raise ValueError("Operation {0!r} not found".format(operation))
 
         serialized = operation_obj.create(*args, **kwargs)
 

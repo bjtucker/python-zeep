@@ -33,7 +33,7 @@ class ServiceProxy(object):
         try:
             self._binding.get(key)
         except KeyError:
-            raise AttributeError('Service has no operation %r' % key)
+            raise AttributeError('Service has no operation {0!r}'.format(key))
         return OperationProxy(self, key)
 
 
